@@ -1,0 +1,53 @@
+CODIGO ULA
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all; 
+
+entity lab04_ula is
+
+port (
+
+		SW : in std_logic_vector (16 downto 0); --7bits para a e b e 3 para a ULACtl
+		HEX0 : out std_logic_vector (0 to 6); --ALUOP
+		HEX2 : out std_logic_vector (0 to 6); --B
+		HEX4 : out std_logic_vector (0 to 6); --A
+		HEX6 : out std_logic_vector (0 to 6); --Result
+		LEDR : out std_logic_vector (2 downto 0) --cout/zero/overflow (0-2)
+	);
+
+end entity lab04_ula;
+ 
+
+architecture arch of lab04_ula is
+
+signal a : std_logic_vector(15 downto 0);
+signal b : std_logic_vector(15 downto 0);
+signal r : std_logic_vector(15 downto 0); --print da resposta
+signal rr : std_logic_vector(47 downto 0);  --guardar todas as respostas 
+signal f : std_logic_vector(2 downto 0); --guardar as flags count zero e overflow respect (2 -> 0)
+signal ULACtl : std_logic_vector(2 downto 0);--definir a operação
+
+Begin
+
+a <= SW(16 downto 10); --concatenar com 0
+b <= SW(9 downto 3);
+ULACtl <= SW(2 downto 0);
+
+rr(6 downto 0) <= a and b
+rr(14 downto 7) <= a or b
+rr(21 downto 15) <= a xor b
+rr(28 downto 22) <= not(a or b)
+rr(36 downto 29) <= std_logic_vector(unsigned(‘0’ & a) + unsigned(‘0’ & b)); --c soma rr(36)
+rr(47 downto 40) <= std_logic_vector(unsigned(‘0’ & a) - unsigned(‘0’ & b)); --c sub rr(47)
+rr(48) <= "1" when unsigned(a) < unsigned(b) else "0"; 
+--carry
+--zero
+--overflow
+
+
+
+
+
+ end architecture arch;
+
