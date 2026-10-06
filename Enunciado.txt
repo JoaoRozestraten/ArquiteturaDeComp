@@ -1,0 +1,110 @@
+Este laboratório pode ser resolvido em grupos de até 4 componentes, que
+podem dividir a carga de trabalho como lhes for mais conveniente.
+A entrega do projeto deve ser feita via Canvas por todos os componentes do
+grupo. Todos os arquivos entregues devem ser identificados, no topo de
+cara arquivo, com os os nomes de todos os componentes do grupo. A
+avaliação dos projetos será feita de acordo com sua funcionalidade.
+Organização de código e eficiência da solução não fazem parte da
+avaliação. Porém, códigos excessivamente mais complicados do que
+poderiam ser poderão ter sua avaliação prejudicada por esse motivo.
+3
+Orientações gerais - parte 2
+Os grupos que concluírem o projeto durante a aula dedicada ao seu
+desenvolvimento e conseguirem demonstrar para o professor, antes do
+horário de fim de aula, o funcionamento do projeto tanto na placa quanto na
+simulação de forma suficiente receberão crédito total pelo projeto e estarão
+dispensados de entregar os documentos auxiliares que descrevem o projeto
+e os testes (os arquivos .pdf). Os códigos VHDL ainda precisam ser
+entregues, mas não serão corrigidos.
+Data e hora limite para entrega via Canvas: 09/outubro 12h00
+Data e hora limite para demonstração: 02/outubro 16h50
+4
+ULA - Unidade lógica e aritmética
+Uma Unidade Lógica e Aritmética
+é um módulo capaz de realizar um
+conjunto de funções aritméticas e
+lógicas orientado pelos sinais de
+controle que recebe. Para isso, a
+ULA tem vetores de entrada e
+saída de dados, uma entrada que
+indica a operação a ser
+executada, e uma série de saídas
+denominadas flags que indicam
+determinadas condições da
+execução da operação ou do valor
+da saída. Neste laboratório, a
+tarefa é descrever em VHDL uma
+ULA compatível com um
+processador simples.
+5
+Nome Largura Descrição
+Entradas
+A 16 bits Primeiro operando
+B 16 bits Segundo operando
+ULACtl 3 bits Operação
+Saídas
+R 16 bits Resultado
+Zero 1 bit 1 se o resultado for zero, 0 em
+caso contrário
+Overflow 1 bit 1 se overflow, 0 se não
+Cout 1 bit 1 se houver carry-out, 0 se não
+As entradas e saídas são:
+ULA - Unidade lógica e aritmética
+As funções lógicas e aritméticas que a ULA executa, conforme o sinal de entrada ULACtl, e os
+respectivos valores da saída R são:
+Os códigos de controle ULACtl que não foram especificados na tabela podem resultar em
+quaisquer valores para quaisquer sinais de saída.
+6
+ULACtl Função Valor de R
+000 AND R = A and B
+001 OR R = A or B
+010 Soma R = A + B
+100 Subtração R = A - B
+110 SLT R = q, se A < B; 0 se A >= B
+111 NOR R = not(A or B)
+Parte 1 - Desenvolvimento da ULA
+Crie em VHDL uma entidade chamada ULA que descreva o hardware especificado no
+enunciado acima. Salve o código da entidade ULA em um arquivo ula.vhd. Sua entidade
+deverá ter as entradas e saídas mencionadas, sem adicionar ou remover nenhum sinal,
+utilizando exatamente os nomes informados. Entradas ou saídas de um único bit deverão
+ser do tipo std_logic, e entradas ou saídas de múltiplos bits do tipo std_logic_vector.
+Você pode utilizar os métodos que julgar mais conveniente para representar cada uma das
+operações dentro da ULA, desde que todo o código seja legítimo e de sua autoria,
+utilizando-se apenas de bibliotecas e pacotes disponíveis no software por padrão. Caso
+decida utilizar instanciar módulos auxiliares dentro da ULA, crie cada módulo como uma
+entidade separada e salve em um arquivo com o nome da entidade. Caso decida utilizar
+pacotes auxiliares, crie o pacote em um arquivo separado e salve com o nome do pacote.
+Entrega: Entregue todos os arquivos .vhd produzidos.
+7
+Parte 2 - Teste por simulação
+Desenvolva uma simulação para testar o funcionamento da ULA. A simulação deve ser um
+testbench, descrito em uma entidade VHDL ULA_tb, que inclua casos de teste para todas
+as operações necessárias, e casos de teste que ativem ou desativem cada uma das flags
+de saída. Salve a entidade de teste no arquivo ula_tb.vhd.
+Escreva, em um documento em formato PDF de no máximo duas páginas, uma descrição
+sobre os testes efetuados. A descrição deve contemplar, para cada teste: qual o objetivo
+do teste, que aspecto do sistema ele explora, qual o resultado esperado, qual o resultado
+obtido e como o resultado demonstra que a descrição do hardware está correta. Se
+necessário, as descrições dos resultados podem fazer referência a screenshots dos
+resultados de simulação (seja dos formatos de onda de saída ou das mensagens escritas
+na tela), que devem ser anexados organizadamente ao documento e não contam para o
+limite de páginas. Salve o arquivo como ula_tb.pdf.
+Entrega: Entregue os arquivos ula_tb.vhd e ula_tb.pdf.
+8
+Parte 3 - Teste na placa DE2-115
+Desenvolva uma interface de comunicação entre a sua ULA e as conexões na placa DE2115. A
+interface deve permitir controlar os valores do sinal de entrada ULACtl e, pelo menos, de parte dos
+sinais A e B através de dispositivos de entrada da placa, e mostrar os valores dos sinais de saída R
+pode ser mostrado só em parte). Salve sua entidade de interface como ula_board.vhd.
+Escreva, em um documento em formato PDF de no máximo duas páginas, uma descrição sobre
+como as conexões foram feitas e quais os testes efetuados. A descrição deve contemplar, para
+cada teste: qual o objetivo do teste, que aspecto do sistema ele explora, qual o resultado esperado,
+qual o resultado obtido e como o resultado demonstra que a descrição do hardware está correta.
+Se necessário, as descrições dos resultados podem fazer referência a fotos da ULA em
+funcionamento na placa, que devem ser anexadas organizadamente ao documento e não contam
+para o limite de páginas. Salve o arquivo como ula_board.pdf.
+Dica: utilize os switches SW17..15] para ULACtrl, SW13..7] para A e SW6..0] para B 7 bits cada).
+Utilize extensão de sinal para completar os valores de A e B (para chegar em 16 bits). Mostre as
+flags em LEDs e o resultado R em hexadecimal nos visores de sete segmentos.
+Entrega: Entregue os arquivos ula_board.vhd e ula_board.pdf.
+9

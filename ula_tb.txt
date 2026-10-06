@@ -1,0 +1,146 @@
+================================================================================
+RELATÓRIO DE TESTE POR SIMULAÇÃO - ULA DE 16 BITS (ula_tb.pdf)
+================================================================================
+Integrantes do Grupo:
+- Daniel Picconi Alquete (RA: 24015408)
+- João Rozestraten (RA: 24005941)
+
+--------------------------------------------------------------------------------
+1. HIERARQUIA DE ARQUIVOS E FLUXOGRAMA DE CHAMADAS
+--------------------------------------------------------------------------------
+A estrutura do projeto é modular. O arquivo de teste (ula_tb.vhd) instancia o 
+módulo principal da ULA (ula.vhd), que por sua vez instancia os submódulos 
+especializados em aritmética (soma.vhd e subtracao.vhd).
+
+FLUXOGRAMA DAS CHAMADAS (QUEM CHAMA QUEM):
+
+ +---------------------------------------------------------+
+ |                      ula_tb.vhd                         |
+ |                 (Entidade: ULA_tb)                      |
+ |  - Gera os sinais de estímulo (A, B, ULACtl)            |
+ |  - Verifica os resultados R e Flags (Zero, Overflow, Cout)
+ +----------------------------+----------------------------+
+                              |
+                              | instanciar (uut)
+                              v
+ +---------------------------------------------------------+
+ |                       ula.vhd                           |
+ |                  (Entidade: ULA)                        |
+ |  - Seleciona a operação via multiplexador (case ULACtl) |
+ |  - Executa operações lógicas diretamente (AND, OR, NOR) |
+ |  - Executa comparação sinalizada SLT (signed)           |
+ |  - Gerencia a saída final R e a flag Zero               |
+ +--------------+---------------------------+--------------+
+                |                           |
+                | instanciar                | instanciar
+                | (inst_Soma)               | (inst_Subtracao)
+                v                           v
+ +--------------------------+   +--------------------------+
+ |         soma.vhd         |   |       subtracao.vhd      |
+ |     (Entidade: Soma)     |   |   (Entidade: Subtracao)  |
+ | - Realiza A + B (17 bits)|   | - Realiza A - B (A+~B+1) |
+ | - Calcula Cout e Overflow|   | - Calcula Cout e Overflow|
+ +--------------------------+   +--------------------------+
+
+--------------------------------------------------------------------------------
+2. INTRODUÇÃO E OBJETIVO DA SIMULAÇÃO
+--------------------------------------------------------------------------------
+Este documento descreve os testes por simulação realizados na Unidade Lógica e 
+Aritmética (ULA) de 16 bits desenvolvida em VHDL. O testbench (entidade ULA_tb 
+no arquivo ula_tb.vhd) foi projetado para validar todas as operações lógicas 
+e aritméticas suportadas pela ULA (AND, OR, SOMA, SUBTRAÇÃO, SLT e NOR), bem 
+como a ativação/desativação correta das flags de saída (Zero, Overflow e Cout).
+
+--------------------------------------------------------------------------------
+3. DESCRIÇÃO DOS TESTES EFETUADOS
+--------------------------------------------------------------------------------
+
+[TESTE 1: Operação Lógica AND]
+- Objetivo: Testar o funcionamento da função lógica AND e verificar se as 
+  flags permanecem zeradas.
+- Aspecto Explorado: Mascaramento de bits e propagação correta do sinal de controle "000".
+- Entrada: ULACtl = "000", A = x"FF00", B = x"F0F0".
+- Resultado Esperado: R = x"F000", Zero = 0, Overflow = 0, Cout = 0.
+- Resultado Obtido: R = x"F000", Zero = 0, Overflow = 0, Cout = 0.
+- Conclusão: A operação AND respondeu exatamente à tabela verdade bit a bit.
+
+[TESTE 2: Operação Lógica OR]
+- Objetivo: Testar a função lógica OR bit a bit.
+- Aspecto Explorado: Combinação lógica OR com sinal de controle "001".
+- Entrada: ULACtl = "001", A = x"F000", B = x"000F".
+- Resultado Esperado: R = x"F00F", Zero = 0, Overflow = 0, Cout = 0.
+- Resultado Obtido: R = x"F00F", Zero = 0, Overflow = 0, Cout = 0.
+- Conclusão: A operação OR foi executada corretamente sem acionar flags indevidas.
+
+[TESTE 3: Soma Simples com Flag Zero]
+- Objetivo: Validar a adição básica e a ativação da flag Zero.
+- Aspecto Explorado: Módulo de soma (0 + 0) e detecção de resultado nulo.
+- Entrada: ULACtl = "010", A = x"0000", B = x"0000".
+- Resultado Esperado: R = x"0000", Zero = 1, Overflow = 0, Cout = 0.
+- Resultado Obtido: R = x"0000", Zero = 1, Overflow = 0, Cout = 0.
+- Conclusão: Confirma o correto acionamento do sinal Zero quando o resultado é 0.
+
+[TESTE 4: Soma com Carry-Out (Cout)]
+- Objetivo: Testar o transbordamento não sinalizado (Carry-Out) na adição.
+- Aspecto Explorado: Propagação de transporte do 16º bit no módulo Soma.
+- Entrada: ULACtl = "010", A = x"FFFF", B = x"0001".
+- Resultado Esperado: R = x"0000", Zero = 1, Overflow = 0, Cout = 1.
+- Resultado Obtido: R = x"0000", Zero = 1, Overflow = 0, Cout = 1.
+- Conclusão: O bit Cout foi ativado corretamente indicando o estouro de capacidade.
+
+[TESTE 5: Soma com Overflow (Estouro com Sinal)]
+- Objetivo: Testar a detecção de overflow em operações com inteiros sinalizados em complemento de dois.
+- Aspecto Explorado: Adição de dois números positivos cujo resultado ultrapassa o limite sinalizado (+32767 + 1 = -32768 em 16 bits).
+- Entrada: ULACtl = "010", A = x"7FFF", B = x"0001".
+- Resultado Esperado: R = x"8000", Zero = 0, Overflow = 1, Cout = 0.
+- Resultado Obtido: R = x"8000", Zero = 0, Overflow = 1, Cout = 0.
+- Conclusão: Demonstra o correto funcionamento do circuito detector de overflow.
+
+[TESTE 6: Subtração Normal]
+- Objetivo: Validar a subtração A - B e o comportamento da flag Cout no complemento de dois.
+- Aspecto Explorado: Módulo de Subtração (A + NOT(B) + 1).
+- Entrada: ULACtl = "100", A = x"000A" (10), B = x"0003" (3).
+- Resultado Esperado: R = x"0007" (7), Zero = 0, Overflow = 0, Cout = 1.
+- Resultado Obtido: R = x"0007", Zero = 0, Overflow = 0, Cout = 1.
+- Conclusão: A subtração forneceu o resultado correto com Cout=1 (sem empréstimo).
+
+[TESTE 7: Subtração com Overflow]
+- Objetivo: Verificar a flag Overflow durante a subtração com sinal.
+- Aspecto Explorado: Subtração de número negativo por positivo resultando em estouro negativo.
+- Entrada: ULACtl = "100", A = x"8000" (-32768), B = x"0001" (1).
+- Resultado Esperado: R = x"7FFF" (+32767), Zero = 0, Overflow = 1, Cout = 1.
+- Resultado Obtido: R = x"7FFF", Zero = 0, Overflow = 1, Cout = 1.
+- Conclusão: A flag Overflow foi ativada corretamente frente ao resultado incoerente com sinal.
+
+[TESTE 8: SLT (Set on Less Than) - Condição Verdadeira]
+- Objetivo: Testar se a ULA identifica corretamente quando A < B considerando números sinalizados.
+- Aspecto Explorado: Comparação com sinal (signed) no controle "110".
+- Entrada: ULACtl = "110", A = x"FFFF" (-1), B = x"0001" (+1).
+- Resultado Esperado: R = x"0001", Zero = 0, Overflow = 0, Cout = 0.
+- Resultado Obtido: R = x"0001", Zero = 0, Overflow = 0, Cout = 0.
+- Conclusão: Como -1 < 1, R assumiu valor 1 conforme especificado.
+
+[TESTE 9: SLT (Set on Less Than) - Condição Falsa]
+- Objetivo: Testar a resposta da ULA quando A >= B.
+- Aspecto Explorado: Retorno zerado do SLT e consequente acionamento do sinal Zero.
+- Entrada: ULACtl = "110", A = x"0005" (5), B = x"0002" (2).
+- Resultado Esperado: R = x"0000", Zero = 1, Overflow = 0, Cout = 0.
+- Resultado Obtido: R = x"0000", Zero = 1, Overflow = 0, Cout = 0.
+- Conclusão: Como 5 não é menor que 2, a saída R foi 0 e a flag Zero ativada.
+
+[TESTE 10 & 11: Operação Lógica NOR]
+- Objetivo: Testar a negação da união lógica e a geração de resultado zero vs não-zero.
+- Aspecto Explorado: Função NOT(A OR B) com controle "111".
+- Entradas:
+  - Teste 10: A = x"0000", B = x"0000" -> Resultado Esperado: R = x"FFFF", Zero = 0.
+  - Teste 11: A = x"FFFF", B = x"0000" -> Resultado Esperado: R = x"0000", Zero = 1.
+- Resultados Obtidos: Bateram 100% com os esperados.
+- Conclusão: A porta NOR opera conforme o esperado.
+
+--------------------------------------------------------------------------------
+4. CONCLUSÃO GERAL DA SIMULAÇÃO
+--------------------------------------------------------------------------------
+Todos os testes foram executados com sucesso no testbench ULA_tb. As asserções 
+(asserts) integradas confirmaram que todas as saídas lógicas, aritméticas e de 
+flags correspondem rigorosamente à especificação do projeto, comprovando a 
+corretude do código VHDL da ULA.

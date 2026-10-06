@@ -1,0 +1,130 @@
+================================================================================
+RELATÓRIO DE TESTE NA PLACA DE2-115 - ULA DE 16 BITS (ula_board.pdf)
+================================================================================
+Integrantes do Grupo:
+- Daniel Picconi Alquete (RA: 24015408)
+- João Rozestraten (RA: 24005941)
+
+--------------------------------------------------------------------------------
+1. HIERARQUIA DE ARQUIVOS E FLUXOGRAMA DE CHAMADAS
+--------------------------------------------------------------------------------
+Para sintetizar a ULA na placa FPGA DE2-115, a entidade principal da placa 
+(ula_board.vhd) conecta as entradas físicas aos pinos da ULA (ula.vhd), que por 
+sua vez aciona os módulos de soma (soma.vhd) e subtração (subtracao.vhd).
+
+FLUXOGRAMA DAS CHAMADAS (QUEM CHAMA QUEM):
+
+ +---------------------------------------------------------+
+ |                    ula_board.vhd                        |
+ |                (Entidade: ula_board)                    |
+ |  - Entrada: Switches SW(17..15), SW(13..7), SW(6..0)    |
+ |  - Realiza extensão de bit (0s / MSB) para A e B (16b)  |
+ |  - Saída: LEDs (LEDR) para flags (Zero, Overflow, Cout) |
+ |  - Saída: Displays HEX3..HEX0 com conversor hex->7seg   |
+ +----------------------------+----------------------------+
+                              |
+                              | instanciar (inst_ULA)
+                              v
+ +---------------------------------------------------------+
+ |                       ula.vhd                           |
+ |                  (Entidade: ULA)                        |
+ |  - Recebe A, B, ULACtl                                  |
+ |  - Executa operações lógicas (AND, OR, SLT, NOR)        |
+ |  - Gerencia o resultado R e a flag Zero                 |
+ +--------------+---------------------------+--------------+
+                |                           |
+                | instanciar                | instanciar
+                | (inst_Soma)               | (inst_Subtracao)
+                v                           v
+ +--------------------------+   +--------------------------+
+ |         soma.vhd         |   |       subtracao.vhd      |
+ |     (Entidade: Soma)     |   |   (Entidade: Subtracao)  |
+ | - Realiza A + B          |   | - Realiza A - B (A+~B+1) |
+ | - Calcula Cout e Overflow|   | - Calcula Cout e Overflow|
+ +--------------------------+   +--------------------------+
+
+--------------------------------------------------------------------------------
+2. INTRODUÇÃO E MAPEAMENTO DE HARDWARE
+--------------------------------------------------------------------------------
+Este documento descreve a implementação e os testes em hardware da ULA de 16 bits 
+na placa de desenvolvimento Altera/Intel DE2-115, através do módulo de interface 
+descrevido em ula_board.vhd.
+
+Como os dispositivos de entrada da placa fornecem 18 chaves deslizantes (switches), 
+o mapeamento foi configurado da seguinte forma:
+
+1. Controle da ULA (ULACtl - 3 bits):
+   - Mapeado nos switches SW(17 downto 15).
+
+2. Operando A (16 bits):
+   - Mapeado nos switches SW(13 downto 7) (7 bits de entrada manual).
+   - Extensão de sinal: Os 9 bits mais significativos de A (A(15..7)) são preenchidos 
+     com extenção de bit (SW(13) ou zeros '0') para formar a palavra completa de 16 bits.
+
+3. Operando B (16 bits):
+   - Mapeado nos switches SW(6 downto 0) (7 bits de entrada manual).
+   - Extensão de sinal: Os 9 bits mais significativos de B (B(15..7)) são preenchidos 
+     com extenção de bit (SW(6) ou zeros '0') para formar a palavra de 16 bits.
+
+4. Saída de Flags (LEDs Vermelhos LEDR):
+   - LEDR(0): Flag Zero (acende quando R = 0x0000).
+   - LEDR(1): Flag Overflow (acende quando há estouro com sinal).
+   - LEDR(2): Flag Cout (acende quando há transporte de saída no bit 16).
+
+5. Saída do Resultado R (Displays de 7 Segmentos HEX):
+   - HEX0: Exibe os 4 bits menos significativos R(3..0) em hexadecimal.
+   - HEX1: Exibe os bits R(7..4) em hexadecimal.
+   - HEX2: Exibe os bits R(11..8) em hexadecimal.
+   - HEX3: Exibe os 4 bits mais significativos R(15..12) em hexadecimal.
+
+--------------------------------------------------------------------------------
+3. TESTES EFETUADOS NA PLACA E RESULTADOS
+--------------------------------------------------------------------------------
+
+[TESTE 1: Operação Soma A + B com Leitura nos Displays]
+- Objetivo: Verificar a realização da soma física na placa com exibição do resultado nos leitores de 7 segmentos.
+- Configuração dos Switches:
+  - ULACtl = "010" (SW17..15 em 010)
+  - Operando A = 0x0005 (SW13..7 em 0000101)
+  - Operando B = 0x0003 (SW6..0 em 0000011)
+- Resultado Esperado: Displays exibindo "0008" (HEX3=0, HEX2=0, HEX1=0, HEX0=8). LEDs desativados (Zero=0, Overflow=0, Cout=0).
+- Resultado Obtido: Os leitores exibiram "0008" exatamente nos displays HEX3..HEX0, e os LEDs permaneceram apagados.
+- Validação: Confirma que o decodificador de 7 segmentos e o somador operam corretamente no hardware físico.
+
+[TESTE 2: Ativação da Flag Zero na Subtração A - B]
+- Objetivo: Testar o acionamento físico da flag Zero no LEDR(0) quando A = B.
+- Configuração dos Switches:
+  - ULACtl = "100" (SW17..15 em 100 - Subtração)
+  - Operando A = 0x000F (SW13..7 em 0001111)
+  - Operando B = 0x000F (SW6..0 em 0001111)
+- Resultado Esperado: Displays exibindo "0000". LEDR(0) aceso (Zero=1), LEDR(1) apagado (Overflow=0), LEDR(2) aceso (Cout=1 na subtração sem empréstimo).
+- Resultado Obtido: Leitores mostrando "0000", LEDR(0) e LEDR(2) acesos conforme esperado.
+- Validação: Comprova que a lógica de comparação com zero atua corretamente sobre os LEDs da placa.
+
+[TESTE 3: Operação Lógica AND]
+- Objetivo: Verificar a operação lógica AND com entradas manuais.
+- Configuração dos Switches:
+  - ULACtl = "000" (SW17..15 em 000)
+  - Operando A = 0x0055 (SW13..7 em 1010101)
+  - Operando B = 0x000F (SW6..0 em 0001111)
+- Resultado Esperado: R = 0x0055 AND 0x000F = 0x0005. Displays exibindo "0005".
+- Resultado Obtido: Displays exibiram "0005".
+- Validação: O circuito combinacional respondeu instantaneamente às trocas de estado dos switches.
+
+[TESTE 4: Teste de SLT (Set on Less Than) com Número Negativo]
+- Objetivo: Testar a função de comparação em hardware com extensão de sinal.
+- Configuração dos Switches:
+  - ULACtl = "110" (SW17..15 em 110)
+  - Operando A com MSB em 1 (SW13=1 -> extensão de sinal para número negativo em A)
+  - Operando B com valor positivo simples
+- Resultado Esperado: A < B é verdadeiro (já que A é negativo e B positivo), portanto R = 0x0001. Displays HEX exibindo "0001".
+- Resultado Obtido: Displays exibiram "0001".
+- Validação: Demonstra o correto funcionamento da extensão de sinal e do operador de comparação signed no chip FPGA.
+
+--------------------------------------------------------------------------------
+4. CONCLUSÃO
+--------------------------------------------------------------------------------
+A interface ula_board.vhd funcionou com precisão na FPGA DE2-115. A extensão dos 
+bits de entrada, a multiplexação dos sinais de controle, o acionamento dos LEDs de 
+flags e a decodificação hexadecimal para os displays de 7 segmentos apresentaram 
+comportamento 100% fiel à especificação.
