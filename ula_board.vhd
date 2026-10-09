@@ -31,9 +31,9 @@ end ula_board;
 
 architecture Behavioral of ula_board is
 
-    -- ================================================================
+    
     -- Componente ULA
-    -- ================================================================
+    
 
     component ULA
         Port (
@@ -48,9 +48,9 @@ architecture Behavioral of ula_board is
         );
     end component;
 
-    -- ================================================================
+    
     -- Sinais internos
-    -- ================================================================
+    
 
     signal sig_A        : std_logic_vector(15 downto 0);
     signal sig_B        : std_logic_vector(15 downto 0);
@@ -63,12 +63,12 @@ architecture Behavioral of ula_board is
     signal sig_Cout     : std_logic;
 
 
-    -- ================================================================
+    
     -- Conversor hexadecimal para display de 7 segmentos
     --
     -- DE2-115 utiliza displays ativos em nível baixo:
     -- 0 = segmento aceso
-    -- ================================================================
+    
 
     function hex_to_7seg (
         hex_digit : std_logic_vector(3 downto 0)
@@ -140,9 +140,9 @@ architecture Behavioral of ula_board is
 
 begin
 
-    -- ================================================================
+    
     -- Entradas da placa
-    -- ================================================================
+    
 
     -- A possui 7 bits.
     -- O bit mais significativo SW(13) é repetido
@@ -165,9 +165,9 @@ begin
     sig_ULACtl <= SW(17 downto 15);
 
 
-    -- ================================================================
+    
     -- Instância da ULA
-    -- ================================================================
+    
 
     inst_ULA : ULA
 
@@ -183,21 +183,21 @@ begin
         );
 
 
-    -- ================================================================
+    
     -- Flags nos LEDs
-    -- ================================================================
+    
 
     LEDR(0) <= sig_Zero;
     LEDR(1) <= sig_Overflow;
     LEDR(2) <= sig_Cout;
 
 
-    -- ================================================================
+    
     -- Resultado nos displays
     --
     -- HEX0 = 4 bits menos significativos
     -- HEX3 = 4 bits mais significativos
-    -- ================================================================
+   
 
     HEX0 <= hex_to_7seg(sig_R(3 downto 0));
 

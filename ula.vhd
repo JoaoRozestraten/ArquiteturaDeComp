@@ -18,9 +18,9 @@ end ULA;
 
 architecture Behavioral of ULA is
 
-    -- ================================================================
+
     -- Componentes auxiliares
-    -- ================================================================
+    
 
     component Soma
         Port (
