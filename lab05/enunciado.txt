@@ -1,0 +1,48 @@
+Arquitetura de Sistemas
+Computacionais
+Engenharia de computação
+Leonardo Rezende <leonardo.costa@puc-campinas.edu.br>
+Escola Politécnica
+2026
+S E C T I O N
+Lab 05 - Datapath (inicio)
+2
+Orientações gerais - parte 1
+Este laboratório pode ser resolvido em grupos de até 4 componentes, que
+podem dividir a carga de trabalho como lhes for mais conveniente.
+A entrega do projeto deve ser feita via Canvas por todos os componentes do
+grupo. Todos os arquivos entregues devem ser identificados, no topo de
+cara arquivo, com os os nomes de todos os componentes do grupo. A
+avaliação dos projetos será feita de acordo com sua funcionalidade.
+Organização de código e eficiência da solução não fazem parte da
+avaliação. Porém, códigos excessivamente mais complicados do que
+poderiam ser poderão ter sua avaliação prejudicada por esse motivo.
+3
+Orientações gerais - parte 2
+Os grupos que concluírem o projeto durante as aulas dedicadas ao seu
+desenvolvimento e conseguirem demonstrar para o professor, antes do
+horário de fim de aula, o funcionamento do projeto tanto na placa quanto na
+simulação de forma suficiente receberão crédito total pelo projeto e estarão
+dispensados de entregar os documentos auxiliares que descrevem o projeto
+e os testes (os arquivos .pdf). Os códigos VHDL ainda precisam ser
+entregues, mas não serão corrigidos.
+Data e hora limite para entrega via Canvas: 23/outubro 12h00
+Data e hora limite para demonstração: 09/outubro 11h30
+4
+Datapath 5
+Datapath 6
+Utilizando a ULA do lab04, projete um datapath básico (de ciclo único), que
+contém uma memória de instruções, um PC, um banco de registradores e a
+ULA. Inicialize a memória com instruções de tipo R. Defina valores razoáveis
+para o tamanho das palavras. Inicialize o banco de registradores com alguns
+valores (já que por enquanto não teremos LW. Teste tanto em simulação,
+quanto na placa. Defina bem os testes e justifique cada uma das escolhas no
+relatório.
+Dica: use um dos 4 botões da placa (canto inferior direito) como sinal de
+clock, mas cuidado com bouncing.
+Entrega 7
+A entrega segue o mesmo molde do Lab04: todos os códigos .vhd
+desenvolvidos e relatórios sobre a simulação e implementação na placa.
+Caso o grupo tenha terminado antes do prazo, pode mostrar o
+funcionamento em aula. Neste caso, não precisa enviar os relatórios (apenas
+os códigos).
